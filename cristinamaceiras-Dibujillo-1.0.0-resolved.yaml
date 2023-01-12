@@ -52,13 +52,13 @@ paths:
       parameters:
       - name: cod
         in: path
-        description: token del usuario
+        description: codigo de la sala
         required: true
         style: simple
         explode: false
         schema:
           type: string
-        example: ghnuiredg7983
+        example: XJW
       - name: sessionToken
         in: header
         description: token del usuario
@@ -88,13 +88,13 @@ paths:
       parameters:
       - name: cod
         in: path
-        description: token del usuario
+        description: codigo de la sala
         required: true
         style: simple
         explode: false
         schema:
           type: string
-        example: ghnuiredg7983
+        example: XJW
       - name: name
         in: path
         description: nombre del usuario
@@ -193,30 +193,39 @@ components:
           example: 3
     publicacion:
       type: array
-      properties:
-        rating:
-          type: integer
-          example: 3
       items:
         oneOf:
-        - type: string
-        - type: string
+        - type: object
+          properties:
+            path:
+              type: string
+              example: /drawings/pepe000002.png
+        - type: object
+          properties:
+            uploadAt:
+              type: string
+              example: 2022-12-12T04:30:23
         - type: array
           items:
-            oneOf:
-            - type: string
-            - type: string
+            type: object
+            properties:
+              user:
+                type: string
+                example: Cristina
+              comment:
+                type: string
+                example: que bonito
   parameters:
     codigo:
       name: cod
       in: path
-      description: token del usuario
+      description: codigo de la sala
       required: true
       style: simple
       explode: false
       schema:
         type: string
-      example: ghnuiredg7983
+      example: XJW
     sessionToken:
       name: sessionToken
       in: header
