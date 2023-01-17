@@ -1,4 +1,3 @@
-CREATE DATABASE dibujillo;
 USE dibujillo;
 
 CREATE TABLE usuario(
