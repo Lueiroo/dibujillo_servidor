@@ -37,7 +37,8 @@ CREATE TABLE comentario(
 CREATE TABLE valora(
     id int primary key not null,
     token_usuario varchar(100) not null,
-    id_dibujo int not null
+    id_dibujo int not null,
+    puntuacion int not null
 );
 
 CREATE TABLE contiene(
