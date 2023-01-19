@@ -1,0 +1,171 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/cristinamaceiras/Dibujillo/1.0.0
+info:
+  description: Especificación de API para proyecto de clase.
+  version: "1.0.0"
+  title: Dibujillo
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: users
+    description: Peticiones para los usuarios (registrados o invitados).
+  - name: games
+    description: Peticiones sobre el juego/partida.
+  - name: drawings
+    description: Peticiones sobre los dibujos
+paths:
+  /guest:
+    post:
+      tags:
+        - users
+      summary: sesión del invitado
+      description: obtener la sesión del invitado
+      responses:
+        '201':
+          description: invitado creado
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    sessionToken:
+                      type: string
+                      example: ghnuiredg7983
+        '400':
+          description: faltan parámetros o incorrectos
+        '401':
+          description: contraseña incorrecta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Paco
+        description: nombre del invitado
+  /game/{cod}/history:
+    get:
+      tags:
+        - games
+      summary: información de la ronda
+      description: recuperar información de la ronda actual
+      parameters:
+       
+        - $ref: '#/components/parameters/codigo'
+        - $ref: '#/components/parameters/sessionToken'
+      responses:
+        '200':
+          description: funcionamiento correcto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: string
+                    example: Perro sobre un caballo
+                  startTime:
+                    type: string
+                    example: 2022-12-12T04:30:23
+        '401':
+          description: token de usuario invalido
+        '404':
+          description: codigo no existe
+  /game/{cod}/player/{name}/drawing/rating:
+    put:
+      tags:
+        - games
+      summary: votacion de los dibujos
+      description: votar cada dibujo
+      parameters:
+        - $ref: '#/components/parameters/codigo'
+        - $ref: '#/components/parameters/sessionToken'
+        - name: name
+          in: path
+          description: nombre del usuario
+          schema:
+            type: string
+            example: Paco
+          required: true
+      responses:
+        '200':
+          description: funcionamiento correcto
+        '400':
+          description: parámetro mal formado
+        '401':
+          description: token de usuario invalido
+        '404':
+          description: codigo o nombre no existen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  example: 3
+  /drawings:
+    get:
+      tags:
+        - drawings
+      summary: recuperar fotos en el feed de la red social
+      description: recuperar los ultimos 20 dibujos compartidos públicamente, de más reciente a más antiguo
+      parameters:
+        - $ref: '#/components/parameters/sessionToken'
+      responses:
+        '200':
+          description: funcionamiento correcto
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        path:
+                          type: string
+                          example: /drawings/pepe000002.png
+                        uploadAt:
+                          type: string
+                          example: 2022-12-12T04:30:23
+                        comments:
+                          type: array
+                          items:
+                            oneOf:
+                              - type: object
+                                properties:
+                                  user:
+                                    type: string
+                                    example: Cristina
+                                  comment:
+                                    type: string
+                                    example: que bonito
+        '401':
+          description: token de usuario invalido
+components:
+  parameters:
+    codigo:
+      name: cod
+      in: path
+      description: codigo de la sala
+      example: XJW
+      schema:
+        type: string
+      required: true
+    sessionToken:
+      name: sessionToken
+      in: header
+      description: token del usuario
+      example: ghnuiredg7983
+      schema:
+        type: string
