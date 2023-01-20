@@ -1,0 +1,197 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Lueiroo/Dibujillo/1.0.0
+info:
+  description: API para Dibujillo
+  version: "1.0.0"
+  title: Dibujillo
+  contact:
+    email: dlueiroc@fpcoruna.afundacion.org
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+    
+    
+    
+paths:
+  /users:
+    post:
+      tags: 
+        - user
+      summary: Registra usuarios
+      operationId: registraUsuarios
+      description: 'Tras pasar nombre de usuario, email y contraseña se agrega el usuario a la base de datos.''
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '201':
+          description: El usuario se añadió correctamente
+        '400':
+          description: Faltan parámetros o son incorrectos
+        '409':
+          description: Usuario ya existente
+          
+  /sessions:
+    post:
+      tags:
+        - sessions
+      summary: Iniciar sesión
+      operationId: iniciaSesion
+      description: 'Tras introducir los datos necesarios (nombre o email / y password) el usuario iniciará sesión.''
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        201:
+          description: Todo joya mi reina
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionToken:
+                    type: string
+                    example: nose
+    
+  /game:
+    post:
+      tags:
+        - game
+      summary: Crea o se une a una sala
+      description: 'Si se elige crear una sala privada la crea, si se elige entrar en una sala pública entrará en una si existen huecos libres o si no creará una nueva'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionToken:
+                  type: string
+                  example: nose
+                private:
+                  type: boolean
+                  example: true
+      responses:
+        200:
+          description: perfe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 'XJW'
+                  players:
+                    type: object
+                    example: {
+                      'Cristina',
+                      'Omar',
+                      'Meri'
+                    }
+                  createdAt:
+                    type: string
+        401:
+          description: Token inválido
+          
+  /game/{codigo}/results:
+    get:
+      tags:
+        - game
+      summary: "Permite ver el podio de la partida de la que se le pasara el código"
+      parameters: 
+        - $ref: "#/components/parameters/cod"
+      responses:
+        200:
+          description: "todo joya"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: object
+                    properties:
+                      player:
+                        type: string
+                        example: "Omar"
+                      result:
+                        type: integer
+                        example: '0'
+        401:
+          description: 'Token inválido'
+        404:
+          description: 'Código no existente'
+        409:
+          description: 'La partida aún no terminó'
+          
+  /drawings/{id}/comments:
+    post:
+      tags:
+        - drawings
+      summary: Añade un comentario
+      parameters: 
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:
+                comment:
+                  type: string
+                  example: "Mango loco, fumar."
+      responses:
+        201:
+          description: "Creado"
+        401:
+          description: "Token inválido"
+        404:
+          description: "Id no existe"
+  
+components:
+  schemas:
+  
+    user:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          format: uuid
+        email: 
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+  parameters:
+    cod:
+      name: codigo
+      in: path
+      required: true
+      description: "El código de la partida"
+      example: '2'
+      schema:
+        type: integer
+        
+    id:
+      name: id
+      in: path
+      required: true
+      description: "Id del dibujo al que se va a añadir un comentario"
+      example: '2'
+      schema:
+        type: integer
