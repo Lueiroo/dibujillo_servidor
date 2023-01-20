@@ -1,0 +1,641 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/crismorber/Dibujillo/1.0.0
+info:
+  description: API para Dibujillo
+  version: "1.0.0"
+  title: Dibujillo
+  contact:
+    email: cmorenob@fpcoruna.afundacion.org
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: Usuario
+    description: Peticiones para los usuarios (registrados o invitados).
+  - name: Sala
+    description: Peticiones sobre el juego/partida.
+  - name: Dibujo
+    description: Peticiones sobre los dibujos
+
+paths:
+  /v1/users:
+      post:
+        tags: 
+          - Usuario
+        summary: Registra usuarios
+        operationId: registraUsuarios
+        description: 'Tras pasar nombre de usuario, email y contraseña se agrega el usuario a la base de datos.''
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        responses:
+          '201':
+            description: El usuario se añadió correctamente
+          '400':
+            description: Faltan parámetros o son incorrectos
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/game'
+          '409':
+            description: Usuario ya existente
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/game'
+                  
+  /v1/sessions:
+    post:
+      tags:
+        - Usuario
+      summary: Iniciar sesión
+      operationId: iniciaSesion
+      description: 'Tras introducir los datos necesarios (nombre o email / y password) el usuario iniciará sesión.''
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        201:
+          description: Todo joya mi reina
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionToken:
+                    type: string
+                    example: nose
+        401:
+          description: Contraseña incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        400:
+          description: Faltan parámetros o son incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /v1/guest:
+    post:
+      tags:
+        - Usuario
+      summary: sesión del invitado
+      description: obtener la sesión del invitado
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Paco
+        description: nombre del invitado
+      responses:
+        '201':
+          description: invitado creado
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    sessionToken:
+                      type: string
+                      example: ghnuiredg7983
+        401:
+          description: Contraseña incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        400:
+          description: Faltan parámetros o son incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /v1/game:
+    post:
+      tags:
+        - Sala
+      summary: Crea o se une a una sala
+      description: 'Si se elige crear una sala privada la crea, si se elige entrar en una sala pública entrará en una si existen huecos libres o si no creará una nueva'
+      parameters:
+       - $ref: '#/components/parameters/sessionToken'
+      responses:
+        200:
+          description: Peticion realizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/game'
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  
+  /v1/game/{cod}:
+  # 5
+    post:
+      tags:
+        - Sala
+      description: te une a una sala por código
+      parameters:
+      - $ref: '#/components/parameters/cod'
+      - $ref: '#/components/parameters/sessionToken'
+      responses:
+        200:
+          description: Peticion realizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/game'
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: El código de la sala no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Une a una sala
+                
+  /v1/game/{cod}/history:
+    get:
+      tags:
+        - Sala
+      summary: información de la ronda
+      description: recuperar información de la ronda actual
+      parameters:
+        - $ref: '#/components/parameters/cod'
+        - $ref: '#/components/parameters/sessionToken'
+      responses:
+        200:
+          description: funcionamiento correcto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: string
+                    example: Perro sobre un caballo
+                  startTime:
+                    type: string
+                    example: 2022-12-12T04:30:23
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: El código de la sala no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+
+  /v1/game/{cod}/drawing:
+  # 7
+    put:
+      tags:
+        - Dibujo
+      description: sube tras n minutos el dibujo despues de startTime
+      parameters:
+      - $ref: '#/components/parameters/cod'
+      - $ref: '#/components/parameters/sessionToken' 
+      - name: drawing
+        in: query
+        description: Base4 encoded png del dibujo
+        schema:
+          type: string
+      responses:
+        200:
+          description: Peticion realizada correctamente
+        400:
+          description: Parámetro mal formado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: El código de la sala no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Sube los dibujos tras N minutos
+                
+  /v1/game/{cod}/player/{name}/drawing:
+  # 8
+    get:
+      tags:
+        - Dibujo
+      description: Obtiene el dibujo de un jugador para verlo y votar.
+      parameters:
+      - $ref: '#/components/parameters/cod' 
+      - $ref: '#/components/parameters/name' 
+      responses:
+        200:
+          description: Peticion realizada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: El código de la sala no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Obtiene los dibujos para votar
+                
+  /v1/game/{cod}/player/{name}/drawing/rating:
+    put:
+      tags:
+        - Sala
+      summary: votacion de los dibujos
+      description: votar cada dibujo
+      parameters:
+        - $ref: '#/components/parameters/cod'
+        - $ref: '#/components/parameters/sessionToken'
+        - $ref: '#/components/parameters/name'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  example: 3
+      responses:
+        200:
+          description: funcionamiento correcto
+        401:
+          description: 'Token inválido'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: 'Código no existente'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        400:
+          description: 'Parámetro mal formado'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      
+   
+  /v1/game/{cod}/results:
+    get:
+      tags:
+        - Sala
+      summary: "Permite ver el podio de la partida de la que se le pasara el código"
+      parameters: 
+        - $ref: "#/components/parameters/cod"
+      responses:
+        200:
+          description: "todo joya"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: object
+                    properties:
+                      player:
+                        type: string
+                        example: "Omar"
+                      result:
+                        type: integer
+                        example: '0'
+        401:
+          description: 'Token inválido'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: 'Código no existente'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        409:
+          description: 'La partida aún no terminó'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+         
+  /v1/game/{cod}/share:
+  # 11
+    post:
+      tags:
+        - Dibujo
+      description: permite compartir el dibujo
+      parameters:
+        - $ref: '#/components/parameters/cod'
+        - $ref: '#/components/parameters/sessionToken'
+      responses:
+        200:
+          description: Peticion realizada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - path
+                  - uploadAt
+                properties:
+                  path:
+                    type: string
+                  uploadAt:
+                    type: string
+                    format: date-time
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: El código de la sala no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Permite compartir los dibujos
+                
+  /v1/drawings:
+    get:
+      tags:
+        - Dibujo
+      summary: recuperar fotos en el feed de la red social
+      description: recuperar los ultimos 20 dibujos compartidos públicamente, de más reciente a más antiguo
+      parameters:
+        - $ref: '#/components/parameters/sessionToken'
+      responses:
+        '200':
+          description: funcionamiento correcto
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        path:
+                          type: string
+                          example: /drawings/pepe000002.png
+                        uploadAt:
+                          type: string
+                          example: 2022-12-12T04:30:23
+                        comments:
+                          type: array
+                          items:
+                            oneOf:
+                              - type: object
+                                properties:
+                                  user:
+                                    type: string
+                                    example: Cristina
+                                  comment:
+                                    type: string
+                                    example: que bonito
+        401:
+          description: "Token inválido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /v1/drawings/{id}/comments:
+    post:
+      tags:
+        - Dibujo
+      summary: Añade un comentario
+      parameters: 
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:
+                comment:
+                  type: string
+                  example: "Mango loco, fumar."
+      responses:
+        201:
+          description: "Creado"
+        401:
+          description: "Token inválido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: "Id no existe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  
+
+  /v1/user/{name}:
+  # 14
+    get:
+      tags: 
+        - Usuario
+      description: Te permite ver el perfil de una persona
+      parameters:
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/sessionToken'
+      responses:
+        200:
+          description: Peticion realizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile'
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: El nombre de perfil no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Ves el perfil de un usuario
+          
+  
+  
+
+components:
+
+  parameters:
+  
+    id:
+      name: id
+      in: path
+      required: true
+      description: "Id del dibujo al que se va a añadir un comentario"
+      example: '2'
+      schema:
+        type: integer
+    
+    name: 
+      name: name
+      in: path
+      description: nombre del jugador
+      required: true
+      schema:
+        type: string
+    cod:
+      name: cod
+      in: path
+      description: 'codigo de la sala'
+      required: true
+      schema:
+        type: string
+        
+    sessionToken:
+      name: SessionToken
+      in: header
+      required: true
+      description: 'Token de sesión de usuario'
+      schema:
+        type: string
+
+  schemas:
+  
+    user:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          format: uuid
+        email: 
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      
+    game:
+      type: object
+      required:
+        - code
+        - players
+        - createdAt
+      properties:
+        code:
+          type: string
+          format: uuid
+        players:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+          
+    profile:
+      type: object
+      required:
+        - drawings
+      properties:
+        drawings:
+          type: object
+          required:
+            - path
+            - uploadAt
+            - comments
+          properties:
+            path:
+              type: string
+            uploadAt:
+              type: string
+              format: date-time
+            comments:
+              type: object
+              required:
+              - user
+              - comment
+              properties:
+                user:
+                  type: string
+                comment:
+                  type: string
+              
+    error:
+      type: object
+      properties:
+        code:
+          description: Código de error
+          type: string
+        status:
+          description: httpstatus
+          type: integer
+          format: int32
+        tipo:
+          type: string
+          description: Tipo de error
+        message:
+          type: string
+          description: Mensaje de error
