@@ -76,6 +76,7 @@ class Valora(models.Model):
     id = models.IntegerField(primary_key=True)
     token_usuario = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='token_usuario')
     id_dibujo = models.ForeignKey(Dibujo, models.DO_NOTHING, db_column='id_dibujo')
+    puntuacion = models.IntegerField()
 
     class Meta:
         managed = False
