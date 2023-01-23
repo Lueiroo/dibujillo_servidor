@@ -29,7 +29,7 @@ paths:
           - Usuario
         summary: Registra usuarios
         operationId: registraUsuarios
-        description: 'Tras pasar nombre de usuario, email y contraseña se agrega el usuario a la base de datos.''
+        description: 'Tras pasar nombre de usuario, email y contraseña se agrega el usuario a la base de datos.'
         requestBody:
           required: true
           content:
@@ -44,13 +44,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/game'
+                  $ref: '#/components/schemas/error'
           '409':
             description: Usuario ya existente
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/game'
+                  $ref: '#/components/schemas/error'
                   
   /v1/sessions:
     post:
@@ -58,7 +58,7 @@ paths:
         - Usuario
       summary: Iniciar sesión
       operationId: iniciaSesion
-      description: 'Tras introducir los datos necesarios (nombre o email / y password) el usuario iniciará sesión.''
+      description: 'Tras introducir los datos necesarios (nombre o email / y password) el usuario iniciará sesión.'
       requestBody:
         required: true
         content:
@@ -135,8 +135,18 @@ paths:
         - Sala
       summary: Crea o se une a una sala
       description: 'Si se elige crear una sala privada la crea, si se elige entrar en una sala pública entrará en una si existen huecos libres o si no creará una nueva'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                private:
+                  type: boolean
       parameters:
        - $ref: '#/components/parameters/sessionToken'
+      
       responses:
         200:
           description: Peticion realizada correctamente
@@ -227,11 +237,14 @@ paths:
       parameters:
       - $ref: '#/components/parameters/cod'
       - $ref: '#/components/parameters/sessionToken' 
-      - name: drawing
-        in: query
-        description: Base4 encoded png del dibujo
-        schema:
-          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                drawing:
+                  type: string
       responses:
         200:
           description: Peticion realizada correctamente
@@ -337,6 +350,7 @@ paths:
       summary: "Permite ver el podio de la partida de la que se le pasara el código"
       parameters: 
         - $ref: "#/components/parameters/cod"
+        - $ref: '#/components/parameters/sessionToken'
       responses:
         200:
           description: "todo joya"
@@ -467,11 +481,12 @@ paths:
         content:
           application/json:
             schema:
-              type: string
+              type: object
               properties:
                 comment:
                   type: string
                   example: "Mango loco, fumar."
+                  
       responses:
         201:
           description: "Creado"
@@ -601,27 +616,29 @@ components:
         - drawings
       properties:
         drawings:
-          type: object
-          required:
-            - path
-            - uploadAt
-            - comments
-          properties:
-            path:
-              type: string
-            uploadAt:
-              type: string
-              format: date-time
-            comments:
-              type: object
-              required:
-              - user
-              - comment
-              properties:
-                user:
-                  type: string
-                comment:
-                  type: string
+          type: array
+          items:
+            oneOf:
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    example: /drawings/pepe000002.png
+                  uploadAt:
+                    type: string
+                    example: 2022-12-12T04:30:23
+                  comments:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            user:
+                              type: string
+                              example: Cristina
+                            comment:
+                              type: string
+                              example: que bonito
               
     error:
       type: object
