@@ -1,7 +1,7 @@
 USE dibujillo;
 
 CREATE TABLE usuario(
-    token varchar(100) primary key not null,
+    token varchar(256) primary key not null,
     nombre varchar(20) not null,
     email varchar(50) null,
     contrasena varchar(20) null
