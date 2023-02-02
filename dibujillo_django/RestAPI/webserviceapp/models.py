@@ -44,7 +44,6 @@ class Partida(models.Model):
     codigo = models.IntegerField(primary_key=True)
     historia = models.CharField(max_length=500)
     createdat = models.DateField(db_column='createdAt')  # Field name made lowercase.
-    publica = models.IntegerField()
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
 
     class Meta:
