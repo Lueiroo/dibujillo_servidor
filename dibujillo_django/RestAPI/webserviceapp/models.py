@@ -19,17 +19,6 @@ class Comentario(models.Model):
         db_table = 'comentario'
 
 
-class Contiene(models.Model):
-    id = models.IntegerField(primary_key=True)
-    id_dibujo = models.ForeignKey('Dibujo', models.DO_NOTHING, db_column='id_dibujo')
-    codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
-    historia = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'contiene'
-
-
 class Dibujo(models.Model):
     id = models.IntegerField(primary_key=True)
     fecha = models.DateField(blank=True, null=True)
@@ -53,6 +42,8 @@ class Participa(models.Model):
 
 class Partida(models.Model):
     codigo = models.IntegerField(primary_key=True)
+    historia = models.CharField(max_length=500)
+    createdat = models.DateField(db_column='createdAt')  # Field name made lowercase.
     publica = models.IntegerField()
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
 
@@ -62,7 +53,7 @@ class Partida(models.Model):
 
 
 class Usuario(models.Model):
-    token = models.CharField(primary_key=True, max_length=100)
+    token = models.CharField(primary_key=True, max_length=256)
     nombre = models.CharField(max_length=20)
     email = models.CharField(max_length=50, blank=True, null=True)
     contrasena = models.CharField(max_length=20, blank=True, null=True)
