@@ -8,6 +8,6 @@ import json
 def inicio_sesion(request):
 	if request.method !=POST:
 		return None
-
+	
 	json_peticion = json.loads(request.body)
 	
