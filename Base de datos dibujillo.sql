@@ -11,7 +11,6 @@ CREATE TABLE partida(
     codigo int primary key not null,
     historia varchar(500) not null,
     createdAt date not null,
-    publica boolean not null,
     token_usuario varchar(100) not null
 );
 
