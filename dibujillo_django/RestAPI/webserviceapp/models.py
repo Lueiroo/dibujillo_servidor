@@ -6,7 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.contrib.auth.hashers import make_password
 
 class Comentario(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -66,6 +66,8 @@ class Usuario(models.Model):
     nombre = models.CharField(max_length=20)
     email = models.CharField(max_length=50, blank=True, null=True)
     contrasena = models.CharField(max_length=20, blank=True, null=True)
+    def set_password(self, raw_password):
+	self.password = make_password(raw_password)
 
     class Meta:
         managed = False
