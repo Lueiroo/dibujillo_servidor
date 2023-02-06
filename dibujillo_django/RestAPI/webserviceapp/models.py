@@ -9,7 +9,6 @@ from django.db import models
 
 
 class Comentario(models.Model):
-    id = models.IntegerField(primary_key=True)
     comentario = models.CharField(max_length=1000)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
     id_dibujo = models.ForeignKey('Dibujo', models.DO_NOTHING, db_column='id_dibujo')
@@ -20,10 +19,10 @@ class Comentario(models.Model):
 
 
 class Dibujo(models.Model):
-    id = models.IntegerField(primary_key=True)
     fecha = models.DateField(blank=True, null=True)
-    link = models.CharField(max_length=100)
+    link = models.CharField(max_length=400)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
+    codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
 
     class Meta:
         managed = False
@@ -31,7 +30,6 @@ class Dibujo(models.Model):
 
 
 class Participa(models.Model):
-    id = models.IntegerField(primary_key=True)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
     codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
 
@@ -41,9 +39,9 @@ class Participa(models.Model):
 
 
 class Partida(models.Model):
-    codigo = models.IntegerField(primary_key=True)
-    historia = models.CharField(max_length=500)
-    createdat = models.DateField(db_column='createdAt')  # Field name made lowercase.
+    codigo = models.CharField(primary_key=True, max_length=3)
+    historia = models.CharField(max_length=500, blank=True, null=True)
+    createdat = models.DateTimeField(db_column='createdAt')  # Field name made lowercase.
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
 
     class Meta:
@@ -55,7 +53,7 @@ class Usuario(models.Model):
     token = models.CharField(primary_key=True, max_length=256)
     nombre = models.CharField(max_length=20)
     email = models.CharField(max_length=50, blank=True, null=True)
-    contrasena = models.CharField(max_length=20, blank=True, null=True)
+    contrasena = models.CharField(max_length=256, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -63,7 +61,6 @@ class Usuario(models.Model):
 
 
 class Valora(models.Model):
-    id = models.IntegerField(primary_key=True)
     token_usuario = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='token_usuario')
     id_dibujo = models.ForeignKey(Dibujo, models.DO_NOTHING, db_column='id_dibujo')
     puntuacion = models.IntegerField()

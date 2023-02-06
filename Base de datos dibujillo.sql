@@ -17,7 +17,7 @@ CREATE TABLE partida(
 CREATE TABLE participa(
     id int auto_increment primary key not null,
     token_usuario varchar(256) not null,
-    codigo_partida int not null
+    codigo_partida varchar(3) not null
 );
 
 CREATE TABLE dibujo(
@@ -25,7 +25,7 @@ CREATE TABLE dibujo(
     fecha date null, /*si tiene fecha ta publicao*/
     link varchar(400) not null,
     token_usuario varchar(256) not null,
-    codigo_partida int not null
+    codigo_partida varchar(3) not null
 );
 
 CREATE TABLE comentario(
