@@ -16,7 +16,7 @@ CREATE TABLE partida(
 
 CREATE TABLE participa(
     id int auto_increment primary key not null,
-    token_usuario varchar(100) not null,
+    token_usuario varchar(256) not null,
     codigo_partida int not null
 );
 
