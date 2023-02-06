@@ -1,13 +1,120 @@
 from django.shortcuts import render
-from .models import Usuario
-import json
+from django.http import HttpResponse, JsonResponse
+from django.decorators.csrf import csrf_exempt
+from .models import Usuario, Partida, Participa, Dibujo
+from django.contrib.auth.hashers import check_password
 
+import json
+import jwt
 
 # Create your views here.
 @csrf_exempt 
-def inicio_sesion(request):
-	if request.method !=POST:
+def login(request):
+	if request.method !='POST':
 		return None
 	
-	json_peticion = json.loads(request.body)
+	try:
+		peticion = json.loads(request.body)
+	except json.decoder.JSONDecodeError:
+		return JsonResponse({'error':'JSON invalido'}, status=400)
 	
+	usuario=Usuario()
+	nameOrEmail=peticion['nameOrEmail']
+	password=peticion['password']
+	usuario.set_password(password)
+
+	if (nameOrEmail == ''):
+		return JsonResponse({'error':'Faltan parámetros'}, status=400)
+
+	name1 = Usuario.objects.filter(nombre = nameOrEmail).exists()
+	email1 = Usuario.objects.filter(email = nameOrEmail).exists()
+
+	if (name1 is True):
+		usuario2=Usuario.objects.get(nombre = nameOrEmail)
+		pass
+	elif (email1 is True):
+		usuario2=Usuario.objects.get(email = nameOrEmail)
+		pass		
+	else:
+		return JsonResponse({'error':'El susuario no existe'}, status=400)
+		
+	if check_password(password, usuario2.contraseña):
+		secret = 'muysecreto'
+		token = jwt.encode(payload, secret, algorithm='HS256')
+		usuario.token = token
+		usuario.save()
+		return JsonResponse({"sessionToken":token},status=200)
+	else:
+		return JsonResponse({'error':'La contraseña es incorrecta'}, status=401)
+	
+
+def join_game(request, cod):
+    session_token = request.headers.get('SessionToken', None)
+    if session_token is None:
+        return JsonResponse({'error': 'Session token required'}, status=401)
+
+    try:
+        user = Usuario.objects.get(token=session_token)
+    except Usuario.DoesNotExist:
+        return JsonResponse({'error': 'Invalid token'}, status=401)
+
+    try:
+        game = Partida.objects.get(codigo=cod)
+    except Partida.DoesNotExist:
+        return JsonResponse({'error': 'Code does not exist'}, status=404)
+
+    Participa.objects.create(token_usuario=user, codigo_partida=game)
+
+    return JsonResponse({
+        'code': game.codigo,
+        'players': [p.token_usuario.nombre for p in game.participa_set.all()],
+        'createdAt': game.createdat,
+    })
+
+
+def get_drawing(request, cod, name):
+
+    try:
+        partida = Partida.objects.get(codigo=cod)
+    except Partida.DoesNotExist:
+        return HttpResponse(status=404)
+    
+    try:
+        usuario = Usuario.objects.get(nombre=name)
+    except Usuario.DoesNotExist:
+        return HttpResponse(status=401)
+    
+    try:
+        participa = Participa.objects.get(token_usuario=usuario.token, codigo_partida=partida.codigo)
+    except Participa.DoesNotExist:
+        return HttpResponse(status=401)
+    
+    try:
+        dibujo = Dibujo.objects.get(token_usuario=usuario.token, codigo_partida=partida.codigo)
+    except Dibujo.DoesNotExist:
+        return HttpResponse(status=404)
+    
+    response_data = {
+        'path': dibujo.link
+    }
+    return JsonResponse(response_data)
+
+
+def share_drawing(request, cod):
+    session_token = request.headers.get('SessionToken', None)
+    if not session_token:
+        return JsonResponse({'error': 'Token inválido'}, status=401)
+
+    try:
+        partida = Partida.objects.get(codigo=cod)
+    except Partida.DoesNotExist:
+        return JsonResponse({'error': 'Código no existe'}, status=404)
+
+    try:
+        dibujo = Dibujo.objects.get(codigo_partida=partida, token_usuario=session_token)
+    except Dibujo.DoesNotExist:
+        return JsonResponse({'error': 'No se puede compartir el dibujo'}, status=400)
+
+    return JsonResponse({'path': dibujo.link, 'uploadAt': dibujo.fecha}, status=200)
+
+
