@@ -98,4 +98,48 @@ def podio(request, cod):
         return JsonResponse({'error': 'SessionToken no existe'}, status=400)
     if Usuario.objects.filter(token=session_token).exists():
         try:
-            
+            valoresParticipa = Participa.objects.filter(codigo_partida=cod)
+            listaJugadores = []
+            for i in valoresParticipa:
+                auxiliar = {}
+                tokenAuxiliar = i.token_usuario
+                dibujo = Dibujo.objects.get(token_usuario=tokenAuxiliar)
+                linkAuxiliar = dibujo.link
+                valoraciones = Valora.objects.filter(id_dibujo=linkAuxiliar)
+                puntuacionAuxiliar = 0
+                for j in valoraciones:
+                    puntuacionAuxiliar = puntuacionAuxiliar + j.puntuacion
+                usuario = Usuario.objects.filter(token=tokenAuxiliar)
+                auxiliar['name'] = usuario.nombre #no sé por qué sale en blanco
+                auxiliar['totalScore'] = puntuacionAuxiliar
+                listaJugadores.append(auxiliar)
+            return JsonResponse(listaJugadores, safe=False)
+
+        except (Exception):
+            return JsonResponse({"status": "Error"})
+    else:
+        return JsonResponse({"status": "Error"})
+
+def comentar(request, id):
+    if request.method != 'POST':
+        return None
+    session_token = request.headers.get('SessionToken')
+    if not session_token:
+        return JsonResponse({'error': 'SessionToken no existe'}, status=400)
+    if Usuario.objects.filter(token=session_token).exists():
+        try:
+            requestBody = json.loads(request.body)
+            comentario = Comentario()
+            comentario.comentario = requestBody['comment']
+            comentario.token_usuario = session_token
+            if Comentario.objects.filter(id_dibujo=id).exists():
+                comentario.id_dibujo = id
+                comentario.id = Comentario.objects.count() + 1
+                comentario.save()
+                return JsonResponse({"status": "Comentario añadido"}, status=201)
+            else:
+                return JsonResponse({"status": "La id no existe"}, status=404)
+        except (Exception):
+            return JsonResponse({"status": "Error"})
+    else:
+        return JsonResponse({"status": "Error"})
