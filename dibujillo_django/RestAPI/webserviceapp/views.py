@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Usuario, Partida
+from .models import Usuario, Partida, Dibujo, Valora
+from datetime import timedelta
 
 import json
 import jwt
 import random
-import timedelta
 
 # Create your views here.
 
@@ -63,9 +63,44 @@ def historia(request, cod):
 	frase = random.choice(listaFrases)
 
 	time = partida.createdat + timedelta(minutes=2)
-	print(time)
 
 	partida.historia = frase
 	partida.save()
 
-	return JsonResponse({'history': frase, 'startTime': partida.createdat}, status = 200)
+	return JsonResponse({'history': frase, 'startTime': time}, status = 200)
+
+#9. game/cod/player/name/drawing/rating
+@csrf_exempt
+def puntuacion(request, cod, nom):
+	if request.method != 'PUT':
+		return None
+
+	token = request.headers.get('sessionToken')
+	tokenBD = Usuario.objects.filter(token = token).exists()
+
+	if not token or tokenBD is False:
+		return JsonResponse({'error': 'Invalid token'}, status=400)
+
+	try:
+		peticion = json.loads(request.body)
+	except json.decoder.JSONDecodeError:
+		return JsonResponse({'error':'JSON invalido'}, status=400)
+
+	puntuacion = peticion['rating']
+	if (puntuacion == ""):
+		return JsonResponse({'error':'Faltan parametros'}, status=400)
+
+	dibujo = Dibujo.objects.select_related('codigo_partida').get(codigo_partida = cod, token_usuario = token)
+	print(dibujo[0])
+
+	valorar = Valora()
+
+	usuarioVota = Usuario.objects.get(token = token)
+
+	#valorar.token_usuario = usuarioVota
+	#valorar.id_dibujo = dibujo[0]
+	#valorar.puntuacion = puntuacion
+
+	#valorar.save()
+
+	return JsonResponse({'state': 'OK'}, status = 200)
