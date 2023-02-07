@@ -35,7 +35,7 @@ class Dibujo(models.Model):
     fecha = models.DateField(blank=True, null=True)
     link = models.CharField(max_length=100)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
-
+    codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
     class Meta:
         managed = False
         db_table = 'dibujo'
@@ -45,6 +45,7 @@ class Participa(models.Model):
     id = models.IntegerField(primary_key=True)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
     codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
+
 
     class Meta:
         managed = False
@@ -66,10 +67,12 @@ class Usuario(models.Model):
     nombre = models.CharField(max_length=20)
     email = models.CharField(max_length=50, blank=True, null=True)
     contrasena = models.CharField(max_length=20, blank=True, null=True)
-    def set_password(self, raw_password):
-	self.password = make_password(raw_password)
 
-    class Meta:
+    def set_password(self, raw_password):
+	    self.contrasena = make_password(raw_password)
+    
+    
+class Meta:
         managed = False
         db_table = 'usuario'
 
