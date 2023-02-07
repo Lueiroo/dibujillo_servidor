@@ -19,6 +19,7 @@ from webserviceapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('guest', views.invitado),
     path('session', views.login),
     path('game/<str:cod>', views.join_game),
     path('game/<str:cod>/player/<str:name>/drawing', views.get_drawing),
