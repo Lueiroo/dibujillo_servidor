@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.decorators.csrf import csrf_exempt
-from .models import Usuario, Partida, Participa, Dibujo
+from .models import Usuario, Partida, Participa, Dibujo, Comentario
 from django.contrib.auth.hashers import check_password
 
 import json
@@ -79,6 +79,9 @@ def login(request):
 	
 
 def join_game(request, cod):
+    if request.method != 'POST':
+        return None
+    
     session_token = request.headers.get('SessionToken', None)
     if session_token is None:
         return JsonResponse({'error': 'Session token required'}, status=401)
@@ -103,6 +106,8 @@ def join_game(request, cod):
 
 
 def get_drawing(request, cod, name):
+    if request.method != 'GET':
+        return None
 
     try:
         partida = Partida.objects.get(codigo=cod)
@@ -131,6 +136,9 @@ def get_drawing(request, cod, name):
 
 
 def share_drawing(request, cod):
+    if request.method != 'POST':
+          return None
+    
     session_token = request.headers.get('SessionToken', None)
     if not session_token:
         return JsonResponse({'error': 'Token inválido'}, status=401)
@@ -148,3 +156,42 @@ def share_drawing(request, cod):
     return JsonResponse({'path': dibujo.link, 'uploadAt': dibujo.fecha}, status=200)
 
 
+def profile(request, name):
+	if request.method != 'GET':
+		return None
+
+	session_token = request.headers.get('SessionToken', None)
+	if not session_token:
+		return JsonResponse({'error': 'Token inválido'}, status=401)
+
+	try:
+		usuario = Usuario.objects.get(nombre=name)
+	except Usuario.DoesNotExist:
+		return JsonResponse({'error': 'Usuario no existe'}, status=404)
+
+	try:
+		participa = Participa.objects.get(token_usuario=usuario.token)
+	except Participa.DoesNotExist:
+		return JsonResponse({'error': 'No se puede obtener el perfil'}, status=400)
+        
+	try:
+		dibujo = Dibujo.objects.get(token_usuario=usuario.token)
+	except Dibujo.DoesNotExist:
+		return JsonResponse({'error': 'No se puede obtener el perfil'}, status=400)
+	
+	try:
+		comentario = Comentario.objects.get(token_usuario=usuario.token)
+	except Comentario.DoesNotExist:
+		return JsonResponse({'error': 'No se puede obtener el perfil'}, status=400)
+
+	response_data = {
+		'drawings': [{
+              'path': dibujo.link,
+              'uploadAt': dibujo.fecha,
+              'comments':[{
+				  'user': usuario.nombre,
+				  'comment': comentario.comentario,
+			}]
+		}],
+	}
+	return JsonResponse(response_data)
