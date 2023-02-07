@@ -48,7 +48,6 @@ def crearPartida(request):
     session_token = request.headers.get('SessionToken')
     if not session_token:
         return JsonResponse({'error': 'SessionToken no existe'}, status=400)
-
     try:
         if Usuario.objects.filter(token=session_token).exists():
             cantidadPartidas = Partida.objects.count() + 1
@@ -61,9 +60,8 @@ def crearPartida(request):
             }, status=200)
         else:
             return JsonResponse({'error': 'Invalid token'}, status=401)
-        except Exception:
-            return JsonResponse({"status": "Error"})
-
+    except Exception:
+        return JsonResponse({"status": "Error"})
 
 def subirDibujo(request, cod):
     if request.method != 'PUT':
