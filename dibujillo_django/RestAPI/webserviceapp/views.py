@@ -131,11 +131,13 @@ def get_drawing(request, cod, name):
     try:
         usuario = Usuario.objects.get(nombre=name)
     except Usuario.DoesNotExist:
+        print("Usuario no existe")
         return HttpResponse(status=401)
     
     try:
         participa = Participa.objects.get(token_usuario=usuario.token, codigo_partida=partida.codigo)
     except Participa.DoesNotExist:
+        print("Participa no existe")
         return HttpResponse(status=401)
     
     try:
