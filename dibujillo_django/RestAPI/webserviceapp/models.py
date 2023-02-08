@@ -55,6 +55,9 @@ class Usuario(models.Model):
     email = models.CharField(max_length=50, blank=True, null=True)
     contrasena = models.CharField(max_length=256, blank=True, null=True)
 
+    def set_password(self, raw_password):
+        self.contrasena = make_password(raw_password) 
+
     class Meta:
         managed = False
         db_table = 'usuario'

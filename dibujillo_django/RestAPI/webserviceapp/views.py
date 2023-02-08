@@ -6,6 +6,7 @@ import jwt
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from json import JSONDecodeError
+from django.contrib.auth.hashers import check_password
 
 # Create your views here.
 @csrf_exempt
@@ -30,6 +31,7 @@ def registrarUsuario(request):
                 else:
                     print("1")
                     usuario.set_password(json_peticion['password'])
+                    print("2")
                     payload = {
                         'nombre': usuario.nombre,
                         'email': usuario.email
