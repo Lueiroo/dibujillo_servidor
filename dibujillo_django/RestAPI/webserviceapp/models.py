@@ -6,10 +6,9 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from django.contrib.auth.hashers import make_password
+
 
 class Comentario(models.Model):
-    id = models.IntegerField(primary_key=True)
     comentario = models.CharField(max_length=1000)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
     id_dibujo = models.ForeignKey('Dibujo', models.DO_NOTHING, db_column='id_dibujo')
@@ -19,33 +18,20 @@ class Comentario(models.Model):
         db_table = 'comentario'
 
 
-class Contiene(models.Model):
-    id = models.IntegerField(primary_key=True)
-    id_dibujo = models.ForeignKey('Dibujo', models.DO_NOTHING, db_column='id_dibujo')
-    codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
-    historia = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'contiene'
-
-
 class Dibujo(models.Model):
-    id = models.IntegerField(primary_key=True)
     fecha = models.DateField(blank=True, null=True)
-    link = models.CharField(max_length=100)
+    link = models.CharField(max_length=400)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
     codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
+
     class Meta:
         managed = False
         db_table = 'dibujo'
 
 
 class Participa(models.Model):
-    id = models.IntegerField(primary_key=True)
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
     codigo_partida = models.ForeignKey('Partida', models.DO_NOTHING, db_column='codigo_partida')
-
 
     class Meta:
         managed = False
@@ -53,8 +39,9 @@ class Participa(models.Model):
 
 
 class Partida(models.Model):
-    codigo = models.IntegerField(primary_key=True)
-    publica = models.IntegerField()
+    codigo = models.CharField(primary_key=True, max_length=3)
+    historia = models.CharField(max_length=500, blank=True, null=True)
+    createdat = models.DateTimeField(db_column='createdAt')  # Field name made lowercase.
     token_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='token_usuario')
 
     class Meta:
@@ -63,22 +50,17 @@ class Partida(models.Model):
 
 
 class Usuario(models.Model):
-    token = models.CharField(primary_key=True, max_length=300)
+    token = models.CharField(primary_key=True, max_length=256)
     nombre = models.CharField(max_length=20)
     email = models.CharField(max_length=50, blank=True, null=True)
-    contrasena = models.CharField(max_length=20, blank=True, null=True)
+    contrasena = models.CharField(max_length=256, blank=True, null=True)
 
-    def set_password(self, raw_password):
-	    self.contrasena = make_password(raw_password)
-    
-    
-class Meta:
+    class Meta:
         managed = False
         db_table = 'usuario'
 
 
 class Valora(models.Model):
-    id = models.IntegerField(primary_key=True)
     token_usuario = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='token_usuario')
     id_dibujo = models.ForeignKey(Dibujo, models.DO_NOTHING, db_column='id_dibujo')
     puntuacion = models.IntegerField()
