@@ -90,13 +90,6 @@ def join_game(request):
         user = Usuario.objects.get(token=session_token)
     except Usuario.DoesNotExist:
         return JsonResponse({'error': 'Invalid token'}, status=401)
-    
-
-
-    try:
-        game = Partida.objects.get(codigo=cod)
-    except Partida.DoesNotExist:
-        return JsonResponse({'error': 'Code does not exist'}, status=404)
 
     Participa.objects.create(token_usuario=user, codigo_partida=game)
 
