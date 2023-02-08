@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('guest', views.invitado),
     path('session', views.login),
-    path('game', views.join_game),
+    path('game/<str:cod>', views.join_game),
     path('game/<str:cod>/player/<str:name>/drawing', views.get_drawing),
     path('game/<str:cod>/share', views.share_drawing),
     path('user/<str:name>', views.profile),
