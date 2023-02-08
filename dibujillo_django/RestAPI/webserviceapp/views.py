@@ -125,6 +125,7 @@ def get_drawing(request, cod, name):
     try:
         partida = Partida.objects.get(codigo=cod)
     except Partida.DoesNotExist:
+        print("Partida no existe")
         return HttpResponse(status=404)
     
     try:
@@ -140,6 +141,7 @@ def get_drawing(request, cod, name):
     try:
         dibujo = Dibujo.objects.get(token_usuario=usuario.token, codigo_partida=partida.codigo)
     except Dibujo.DoesNotExist:
+        print("Dibujo no existe")
         return HttpResponse(status=404)
     
     response_data = {
