@@ -9,6 +9,8 @@ from json import JSONDecodeError
 from django.contrib.auth.hashers import check_password, make_password
 
 # Create your views here.
+
+#Esta funciona
 @csrf_exempt
 def registrarUsuario(request):
     if request.method != 'POST':
@@ -29,24 +31,22 @@ def registrarUsuario(request):
                 if Usuario.objects.filter(email=usuario.email).exists():
                     return JsonResponse({"status": "Email ya existente"}, status=409)
                 else:
-                    print("1")
-                    usuario.set_password(json_peticion['password']) 
-                    print("2")
+                    usuario.set_password(json_peticion['password'])
                     payload = {
                         'nombre': usuario.nombre,
                         'email': usuario.email
                     }
-                    print("2")
                     secret = 'kukizalazar'
                     token = jwt.encode(payload, secret, algorithm='HS256')
                     usuario.token = token
-                    print("klk")
                     usuario.save()
                     return JsonResponse({"status": "joya"}, status=201)
     except (JSONDecodeError, Exception):
         return JsonResponse({"status": "Error"})
 
 
+#por probar
+@csrf_exempt
 def crearPartida(request):
     if request.method != 'POST':
         return None
@@ -59,6 +59,13 @@ def crearPartida(request):
             cantidadPartidas = Partida.objects.count() + 1
             usuario = Usuario.objects.get(token=session_token)
             players = usuario.nombre
+            partida = Partida()
+            partida.codigo = cantidadPartidas
+            partida.createdat = datetime.now()
+            print("pa mi k es aqui")
+            partida.token_usuario = session_token
+            print("jeje")
+            partida.save()
             return JsonResponse({
                 'code': cantidadPartidas,
                 'players': {players},
@@ -69,6 +76,7 @@ def crearPartida(request):
     except Exception:
         return JsonResponse({"status": "Error"})
 
+#por probar
 def subirDibujo(request, cod):
     if request.method != 'PUT':
         return None
@@ -94,6 +102,7 @@ def subirDibujo(request, cod):
         return JsonResponse({"status": "Error"})
 
 
+#por probar
 def podio(request, cod):
     if request.method != 'GET':
         return None
@@ -124,6 +133,8 @@ def podio(request, cod):
     else:
         return JsonResponse({"status": "Error"})
 
+#por probar
+@csrf_exempt
 def comentar(request, id):
     if request.method != 'POST':
         return None
