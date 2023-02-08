@@ -21,6 +21,7 @@ from webserviceapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('guest', views.invitado),
+    path('game/<cod>', views.datosSala),
     path('game/<cod>/history', views.historia),
     path('game/<cod>/player/<nom>/drawing/rating', views.puntuacion),
     path('drawings', views.dibujos),

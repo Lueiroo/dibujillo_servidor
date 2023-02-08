@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Usuario, Partida, Dibujo, Valora, Comentario
+from .models import Usuario, Partida, Dibujo, Valora, Comentario, Participa
 from datetime import timedelta
 
 import json
@@ -69,6 +69,35 @@ def historia(request, cod):
 
 	return JsonResponse({'history': frase, 'startTime': time}, status = 200)
 
+#5b. game/cod mal
+@csrf_exempt
+def datosSala(request, cod):
+	if request.method != 'GET':
+		return None
+
+	token = request.headers.get('sessionToken')
+	tokenBD = Usuario.objects.filter(token = token).exists()
+
+	if not token or tokenBD is False:
+		return JsonResponse({'error': 'Invalid token'}, status=400)
+
+	try:
+		partida = Partida.objects.get(codigo = cod)
+	except:
+		return JsonResponse({'error':'Codigo no existe'})
+
+	participantes = Participa.objects.select_related("token_usuario").all()
+
+	usuario = Usuario.objects.get(token = participantes)
+
+	resultado = {
+		'code': cod,
+		'players' : [],
+		'createdAt': partida.createdat
+	}
+
+	return JsonResponse({'state': 'OK'}, status = 200)
+
 #9. game/cod/player/name/drawing/rating mal
 @csrf_exempt
 def puntuacion(request, cod, nom):
@@ -90,18 +119,18 @@ def puntuacion(request, cod, nom):
 	if (puntuacion == ""):
 		return JsonResponse({'error':'Faltan parametros'}, status=400)
 
-	dibujo = Dibujo.objects.select_related('codigo_partida').get(codigo_partida = cod, token_usuario = token)
-	print(dibujo[0])
+	tokenDibujante = Usuario.objects.get(nombre = nom)
+
+	dibujo = Dibujo.objects.get(codigo_partida = cod, token_usuario = tokenDibujante.token)
+
 
 	valorar = Valora()
 
-	usuarioVota = Usuario.objects.get(token = token)
+	valorar.token_usuario = tokenDibujante
+	valorar.id_dibujo = dibujo
+	valorar.puntuacion = puntuacion
 
-	#valorar.token_usuario = usuarioVota
-	#valorar.id_dibujo = dibujo[0]
-	#valorar.puntuacion = puntuacion
-
-	#valorar.save()
+	valorar.save()
 
 	return JsonResponse({'state': 'OK'}, status = 200)
 
@@ -130,8 +159,8 @@ def dibujos(request):
 
 		for comentario in comentarios:
 			diccionario2 = {}
-			tokenUsuario = Comentario.objects.get(token_usuario = token)
-			print(tokenUsuario.values())
+			tokenUsuario = Comentario.objects.get(token_usuario = comentario.token_usuario)
+			print(tokenUsuario.token_usuario)
 			nombre = Usuario.objects.get(token = tokenUsuario.token_usuario)
 			diccionario2['user']  = nombre.nombre
 			diccionario2['comment'] = comentario.comentario
