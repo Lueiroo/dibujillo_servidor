@@ -86,7 +86,7 @@ def join_game(request, cod):
     try:
         session_token = request.headers['sessionToken']
     except Exception:
-        return JsonResponse({'error':'SessionToken dont exists'}, status=401)
+        return JsonResponse({'error':'SessionToken does no exist'}, status=401)
     try:
         user = Usuario.objects.get(token=session_token)
     except Usuario.DoesNotExist:
