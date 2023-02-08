@@ -91,9 +91,7 @@ def join_game(request):
     except Usuario.DoesNotExist:
         return JsonResponse({'error': 'Invalid token'}, status=401)
     
-    cod = request.POST.get('cod')
-    if not cod:
-        return JsonResponse({'error': 'Code does not exist'}, status=400)
+
 
     try:
         game = Partida.objects.get(codigo=cod)
