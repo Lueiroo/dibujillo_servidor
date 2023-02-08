@@ -103,7 +103,7 @@ def join_game(request):
         'code': game.codigo,
         'players': [p.token_usuario.nombre for p in game.participa_set.all()],
         'createdAt': game.createdat,
-    })
+    }, status=200)
 
 
 def get_drawing(request, cod, name):
