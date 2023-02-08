@@ -79,7 +79,7 @@ def login(request):
 		return JsonResponse({'error':'La contraseña es incorrecta'}, status=401)
 	
 @csrf_exempt 
-def join_game(request, cod):
+def join_game(request):
     if request.method != 'POST':
         return None
 
