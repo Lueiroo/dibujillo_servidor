@@ -63,7 +63,7 @@ class Partida(models.Model):
 
 
 class Usuario(models.Model):
-    token = models.CharField(primary_key=True, max_length=100)
+    token = models.CharField(primary_key=True, max_length=300)
     nombre = models.CharField(max_length=20)
     email = models.CharField(max_length=50, blank=True, null=True)
     contrasena = models.CharField(max_length=20, blank=True, null=True)

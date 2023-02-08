@@ -4,10 +4,11 @@ import json
 from .models import *
 import jwt
 from datetime import datetime
-
+from django.views.decorators.csrf import csrf_exempt
+from json import JSONDecodeError
 
 # Create your views here.
-
+@csrf_exempt
 def registrarUsuario(request):
     if request.method != 'POST':
         return None
@@ -17,7 +18,7 @@ def registrarUsuario(request):
         usuario.nombre = json_peticion['name']
         usuario.email = json_peticion['email']
         usuario.contrasena = json_peticion['password']
-
+        print("omar burro")
         if usuario.nombre == '' or usuario.email == '' or usuario.contrasena == '':
             return JsonResponse({"status": "Faltan parámetros"}, status=400)
         else:
@@ -27,14 +28,17 @@ def registrarUsuario(request):
                 if Usuario.objects.filter(email=usuario.email).exists():
                     return JsonResponse({"status": "Email ya existente"}, status=409)
                 else:
+                    print("1")
                     usuario.set_password(json_peticion['password'])
                     payload = {
                         'nombre': usuario.nombre,
                         'email': usuario.email
                     }
+                    print("2")
                     secret = 'kukizalazar'
                     token = jwt.encode(payload, secret, algorithm='HS256')
                     usuario.token = token
+                    print("klk")
                     usuario.save()
                     return JsonResponse({"status": "joya"}, status=201)
     except (JSONDecodeError, Exception):
