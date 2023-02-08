@@ -179,42 +179,71 @@ def share_drawing(request, cod):
 
 def profile(request, name):
     if request.method != 'GET':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+        return None
 
     try:
         session_token = request.headers.get('sessionToken')
     except Exception:
         return JsonResponse({'error': 'SessionToken does no exist'}, status=401)
 
-    try:
-        user = Usuario.objects.get(nombre=name)
-    except Usuario.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
+    dibujosOrden = Dibujo.objects.all().order_by("fecha")
+    historia= Dibujo.objects.filter(codigo_partida=Partida.codigo)
 
-    try:
-        participations = Participa.objects.filter(token_usuario=user.token)
-    except Participa.DoesNotExist:
-        return JsonResponse({'error': 'Unable to retrieve profile'}, status=400)
+    dibujos = []
+    for dibujo in dibujosOrden:
+        diccionario = {}
+        diccionario['id'] = dibujo['id']
+        diccionario['path'] = dibujo['link']
+        diccionario['UploadAt'] = dibujo['fecha']
+        
+        historia= Partida.objects.get(codigo=dibujo['codigo_partida_id'])
+        diccionario['history'] = historia.historia
+        
+        nombreUsuario = Usuario.objects.get(token=dibujo['token_usuario_id'])
+        diccionario['user'] = nombreUsuario.nombre
 
-    response_data = {'drawings': []}
-    for participation in participations:
-        try:
-            drawing = Dibujo.objects.get(
-                codigo_partida=participation.codigo_partida)
-            game = drawing.partida
-        except Dibujo.DoesNotExist:
-            continue
-        comments = Comentario.objects.filter(id_dibujo=drawing.id)
-        drawing_data = {
-            'id': drawing.id,
-            'history': game.historia,
-            'path': drawing.link,
-            'uploadedAt': drawing.fecha,
-            'comments': [{
-                'user': comment.usuario.nombre,
-                'comment': comment.comentario,
-            } for comment in comments],
-        }
-    response_data['drawings'].append(drawing_data)
+        diccionario['comments'] = []
+        comentarios= Comentario.objects.filter(id_dibujo=dibujo['id']).values()
+        dibujos.append(diccionario)
+        for comentario in comentarios:
+            diccionario2 = {}
+            tokenUsuario = Usuario.objects.get(token=dibujo['token_usuario_id'])
+            nombre= Usuario.objects.get(token=tokenUsuario.token)
+            diccionario2['user'] = nombre.nombre
+            diccionario2['comment'] = comentario['comentario']
+            diccionario2['comments'].append(diccionario2)
 
-    return JsonResponse(response_data)
+    return JsonResponse(dibujos, safe=False)
+
+
+def dibujos(request):
+    if request.method != 'GET':
+        return None
+
+    token = request.headers.get('sessionToken')
+    tokenBD = Usuario.objects.filter(token=token).exists()
+
+    if not token or tokenBD is False:
+        return JsonResponse({'error': 'Invalid token'}, status=400)
+
+    dibujosOrdenados = Dibujo.objects.all().order_by("fecha")
+
+    respuesta = []
+    for dibujo in dibujosOrdenados:
+        diccionario = {}
+        diccionario['path'] = dibujo.link
+        diccionario['UploadAt'] = dibujo.fecha
+        diccionario['comments'] = []
+
+        comentarios = Comentario.objects.all().filter(id_dibujo=dibujo.id)
+
+        for comentario in comentarios:
+            diccionario2 = {}
+            tokenUsuario = Comentario.objects.get(
+                token_usuario=comentario.token_usuario)
+            print(tokenUsuario.token_usuario)
+            nombre = Usuario.objects.get(token=tokenUsuario.token_usuario)
+            diccionario2['user'] = nombre.nombre
+            diccionario2['comment'] = comentario.comentario
+
+    return JsonResponse(respuesta)
