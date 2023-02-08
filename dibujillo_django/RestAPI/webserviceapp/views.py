@@ -181,10 +181,11 @@ def profile(request, name):
     if request.method != 'GET':
         return None
 
-    try:
-        session_token = request.headers.get('sessionToken')
-    except Exception:
-        return JsonResponse({'error': 'SessionToken does no exist'}, status=401)
+    token = request.headers.get('sessionToken')
+    tokenBD = Usuario.objects.filter(token=token).exists()
+
+    if not token or tokenBD is False:
+        return JsonResponse({'error': 'Invalid token'}, status=400)
 
     dibujosOrden = Dibujo.objects.all().order_by("fecha")
     historia= Dibujo.objects.filter(codigo_partida=Partida.codigo)
@@ -216,34 +217,4 @@ def profile(request, name):
     return JsonResponse(dibujos, safe=False)
 
 
-def dibujos(request):
-    if request.method != 'GET':
-        return None
 
-    token = request.headers.get('sessionToken')
-    tokenBD = Usuario.objects.filter(token=token).exists()
-
-    if not token or tokenBD is False:
-        return JsonResponse({'error': 'Invalid token'}, status=400)
-
-    dibujosOrdenados = Dibujo.objects.all().order_by("fecha")
-
-    respuesta = []
-    for dibujo in dibujosOrdenados:
-        diccionario = {}
-        diccionario['path'] = dibujo.link
-        diccionario['UploadAt'] = dibujo.fecha
-        diccionario['comments'] = []
-
-        comentarios = Comentario.objects.all().filter(id_dibujo=dibujo.id)
-
-        for comentario in comentarios:
-            diccionario2 = {}
-            tokenUsuario = Comentario.objects.get(
-                token_usuario=comentario.token_usuario)
-            print(tokenUsuario.token_usuario)
-            nombre = Usuario.objects.get(token=tokenUsuario.token_usuario)
-            diccionario2['user'] = nombre.nombre
-            diccionario2['comment'] = comentario.comentario
-
-    return JsonResponse(respuesta)
