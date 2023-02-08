@@ -199,13 +199,15 @@ def profile(request, name):
         except Dibujo.DoesNotExist:
             continue
         comments = Comentario.objects.filter(id_dibujo=drawing.id)
+        partida = Partida.objects.get(codigo=drawing.codigo_partida)
+        usuario = Usuario.objects.get(token=drawing.token_usuario)
         drawing_data = {
             'id': drawing.id,
-            'history': drawing.partida.historia,
+            'history': partida.historia,
             'path': drawing.link,
             'uploadedAt': drawing.fecha,
             'comments': [{
-                'user': comment.usuario.nombre,
+                'user': usuario.nombre,
                 'comment': comment.comentario,
             } for comment in comments],
         }
