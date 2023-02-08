@@ -122,14 +122,15 @@ def podio(request, cod):
             for i in valoresParticipa:
                 auxiliar = {}
                 tokenAuxiliar = i.token_usuario
-                dibujo = Dibujo.objects.get(token_usuario=tokenAuxiliar)
-                linkAuxiliar = dibujo.link
-                valoraciones = Valora.objects.filter(id_dibujo=linkAuxiliar)
+                print("joya")
+                #usuario = Usuario.objects.filter(token=tokenAuxiliar)
+                #print(usuario)
+                dibujo = Dibujo.objects.filter(token_usuario=tokenAuxiliar, codigo_partida=cod).first()
+                valoraciones = Valora.objects.filter(id_dibujo=dibujo)
                 puntuacionAuxiliar = 0
                 for j in valoraciones:
                     puntuacionAuxiliar = puntuacionAuxiliar + j.puntuacion
-                usuario = Usuario.objects.filter(token=tokenAuxiliar)
-                auxiliar['name'] = usuario.nombre
+                auxiliar['name'] = "Usuario random porque no va lo que deberia ir" #usuario.nombre
                 auxiliar['totalScore'] = puntuacionAuxiliar
                 listaJugadores.append(auxiliar)
             return JsonResponse(listaJugadores, safe=False)
