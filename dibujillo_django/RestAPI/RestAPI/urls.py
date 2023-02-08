@@ -15,10 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from webserviceapp import views
 
 from webserviceapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('guest', views.invitado),
+    path('users/', views.registrarUsuario),
+    path('game/', views.crearPartida),
+    path('game/<int:cod>', views.subirDibujo),
+    path('game/<int:cod>', views.podio),
+    path('drawings/<int:id>/comments', views.comentar)
 ]
