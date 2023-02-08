@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 from .models import Usuario, Partida, Participa, Dibujo, Comentario
 from django.contrib.auth.hashers import check_password
 
