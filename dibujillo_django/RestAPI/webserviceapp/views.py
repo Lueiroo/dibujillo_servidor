@@ -76,7 +76,8 @@ def crearPartida(request):
     except Exception:
         return JsonResponse({"status": "Error"})
 
-#por probar
+#funciona
+@csrf_exempt
 def subirDibujo(request, cod):
     if request.method != 'PUT':
         return None
@@ -87,15 +88,20 @@ def subirDibujo(request, cod):
     try:
         if Usuario.objects.filter(token=session_token).exists():
             dibujo = Dibujo()
-            dibujo.token_usuario = session_token
+            usuario = Usuario.objects.get(token=session_token)
+            dibujo.token_usuario = usuario
             dibujo.id = Dibujo.objects.count() + 1
+            print("hehe")
             try:
-                peticion = json.loads(request)
+                peticion = json.loads(request.body)
             except JSONDecodeError:
                 return JsonResponse({"status": "Parámetro malformado"}, status=400)
+            print("joya")
             dibujo.link = peticion["drawing"]
-            dibujo.codigo_partida=cod
+            partida = Partida.objects.get(codigo=cod)
+            dibujo.codigo_partida=partida
             dibujo.save()
+            return JsonResponse({'status':'joya'}, status=200)
         else:
             return JsonResponse({'error': 'Invalid token'}, status=401)
     except (Exception):
