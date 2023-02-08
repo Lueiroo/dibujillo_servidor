@@ -129,7 +129,7 @@ def podio(request, cod):
                 for j in valoraciones:
                     puntuacionAuxiliar = puntuacionAuxiliar + j.puntuacion
                 usuario = Usuario.objects.filter(token=tokenAuxiliar)
-                auxiliar['name'] = usuario.nombre #no sé por qué sale en blanco
+                auxiliar['name'] = usuario.nombre
                 auxiliar['totalScore'] = puntuacionAuxiliar
                 listaJugadores.append(auxiliar)
             return JsonResponse(listaJugadores, safe=False)
@@ -139,7 +139,7 @@ def podio(request, cod):
     else:
         return JsonResponse({"status": "Error"})
 
-#por probar
+#funciona
 @csrf_exempt
 def comentar(request, id):
     if request.method != 'POST':
@@ -152,9 +152,11 @@ def comentar(request, id):
             requestBody = json.loads(request.body)
             comentario = Comentario()
             comentario.comentario = requestBody['comment']
-            comentario.token_usuario = session_token
-            if Comentario.objects.filter(id_dibujo=id).exists():
-                comentario.id_dibujo = id
+            usuario = Usuario.objects.get(token=session_token)
+            comentario.token_usuario = usuario
+            if Dibujo.objects.filter(id=id).exists():
+                dibujo = Dibujo.objects.get(id=id)
+                comentario.id_dibujo = dibujo
                 comentario.id = Comentario.objects.count() + 1
                 comentario.save()
                 return JsonResponse({"status": "Comentario añadido"}, status=201)
