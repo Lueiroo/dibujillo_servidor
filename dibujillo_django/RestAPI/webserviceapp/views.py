@@ -35,10 +35,11 @@ def invitado(request):
 		token = jwt.encode(payload, secret, algorithm='HS256')
 		invitado.token = token
 		invitado.save()
-		return JsonResponse({"sessionToken":token},status=200)
+		return JsonResponse({"sessionToken":token},status=201)
 	else:
 		return JsonResponse({'error':'Nombre ya existe'}, status=400)
-	
+
+@csrf_exempt 	
 def login(request):
 	if request.method !='POST':
 		return None
@@ -77,15 +78,15 @@ def login(request):
 	else:
 		return JsonResponse({'error':'La contraseña es incorrecta'}, status=401)
 	
-
+@csrf_exempt 
 def join_game(request, cod):
     if request.method != 'POST':
         return None
-    
-    session_token = request.headers.get('SessionToken', None)
-    if session_token is None:
-        return JsonResponse({'error': 'Session token required'}, status=401)
 
+    try:
+        session_token = request.headers['sessionToken']
+    except Exception:
+        return JsonResponse({'error':'SessionToken dont exists'}, status=401)
     try:
         user = Usuario.objects.get(token=session_token)
     except Usuario.DoesNotExist:
@@ -134,7 +135,7 @@ def get_drawing(request, cod, name):
     }
     return JsonResponse(response_data)
 
-
+@csrf_exempt 
 def share_drawing(request, cod):
     if request.method != 'POST':
           return None
