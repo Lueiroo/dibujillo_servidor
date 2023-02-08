@@ -82,7 +82,6 @@ def login(request):
 def join_game(request):
     if request.method != 'POST':
         return None
-    print(request.headers['sessionToken'])
     try:
         session_token = request.headers['sessionToken']
     except Exception:
