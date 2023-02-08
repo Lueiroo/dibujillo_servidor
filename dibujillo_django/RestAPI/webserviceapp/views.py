@@ -174,40 +174,40 @@ def share_drawing(request, cod):
 
 
 def profile(request, name):
-	if request.method != 'GET':
-		return None
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-	session_token = request.headers.get('SessionToken', None)
-	if not session_token:
-		return JsonResponse({'error': 'Token inválido'}, status=401)
+    session_token = request.headers.get('SessionToken', None)
+    if not session_token:
+        return JsonResponse({'error': 'Invalid token'}, status=401)
 
-	try:
-		usuario = Usuario.objects.get(nombre=name)
-	except Usuario.DoesNotExist:
-		return JsonResponse({'error': 'Usuario no existe'}, status=404)
+    try:
+        user = Usuario.objects.get(nombre=name)
+    except Usuario.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 
-	try:
-		participa = Participa.objects.filter(token_usuario=usuario.token)
-	except Participa.DoesNotExist:
-		return JsonResponse({'error': 'No se puede obtener el perfil'}, status=400)
+    try:
+        participations = Participa.objects.filter(token_usuario=user.token)
+    except Participa.DoesNotExist:
+        return JsonResponse({'error': 'Unable to retrieve profile'}, status=400)
 
-	response_data = {'drawings': []}
-	for participacion in participa:
-		try:
-			dibujo = Dibujo.objects.get(token=participacion.token_dibujo)
-		except Dibujo.DoesNotExist:
-			continue
-		comentarios = Comentario.objects.filter(token_dibujo=dibujo.token)
-		drawing = {
-			'id': dibujo.id,
-			'history': dibujo.historia,
-			'path': dibujo.link,
-			'uploadAt': dibujo.fecha,
-			'comments': [{
-				'user': comentario.usuario.nombre,
-				'comment': comentario.comentario,
-			} for comentario in comentarios],
-		}
-		response_data['drawings'].append(drawing)
+    response_data = {'drawings': []}
+    for participation in participations:
+        try:
+            drawing = Dibujo.objects.get(token=participation.token_dibujo)
+        except Dibujo.DoesNotExist:
+            continue
+        comments = Comentario.objects.filter(token_dibujo=drawing.token)
+        drawing_data = {
+            'id': drawing.id,
+            'history': drawing.historia,
+            'path': drawing.link,
+            'uploadedAt': drawing.fecha,
+            'comments': [{
+                'user': comment.usuario.nombre,
+                'comment': comment.comentario,
+            } for comment in comments],
+        }
+        response_data['drawings'].append(drawing_data)
 
-	return JsonResponse(response_data)
+    return JsonResponse(response_data)
