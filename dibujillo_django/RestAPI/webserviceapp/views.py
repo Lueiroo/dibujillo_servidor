@@ -83,13 +83,17 @@ def join_game(request):
     if request.method != 'POST':
         return None
     try:
-        session_token = request.headers['sessionToken']
+       session_token = request.headers.get('sessionToken')
     except Exception:
         return JsonResponse({'error':'SessionToken does no exist'}, status=401)
     try:
         user = Usuario.objects.get(token=session_token)
     except Usuario.DoesNotExist:
         return JsonResponse({'error': 'Invalid token'}, status=401)
+    
+    cod = request.POST.get('cod')
+    if not cod:
+        return JsonResponse({'error': 'Code does not exist'}, status=400)
 
     try:
         game = Partida.objects.get(codigo=cod)
