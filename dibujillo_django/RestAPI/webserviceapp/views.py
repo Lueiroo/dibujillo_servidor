@@ -177,7 +177,7 @@ def profile(request, name):
     if request.method != 'GET':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-    session_token = request.META.get('SessionToken', None)
+    session_token = request.META.get('sessionToken', None)
     if not session_token:
         return JsonResponse({'error': 'Invalid token'}, status=401)
 
