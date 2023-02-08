@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
-from .models import *
+from .models import Usuario, Partida, Dibujo, Valora, Comentario, Participa
 import jwt
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from json import JSONDecodeError
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 
 # Create your views here.
 @csrf_exempt
@@ -19,7 +19,7 @@ def registrarUsuario(request):
         usuario.nombre = json_peticion['name']
         usuario.email = json_peticion['email']
         usuario.contrasena = json_peticion['password']
-        print("omar burro")
+        print(json_peticion)
         if usuario.nombre == '' or usuario.email == '' or usuario.contrasena == '':
             return JsonResponse({"status": "Faltan parámetros"}, status=400)
         else:
@@ -30,7 +30,7 @@ def registrarUsuario(request):
                     return JsonResponse({"status": "Email ya existente"}, status=409)
                 else:
                     print("1")
-                    usuario.set_password(json_peticion['password'])
+                    usuario.set_password(json_peticion['password']) 
                     print("2")
                     payload = {
                         'nombre': usuario.nombre,
