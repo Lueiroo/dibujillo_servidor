@@ -23,4 +23,5 @@ urlpatterns = [
     path('guest', views.invitado),
     path('game/<cod>/history', views.historia),
     path('game/<cod>/player/<nom>/drawing/rating', views.puntuacion),
+    path('drawings', views.dibujos),
 ]

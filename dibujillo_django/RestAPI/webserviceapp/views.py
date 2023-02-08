@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Usuario, Partida, Dibujo, Valora
+from .models import Usuario, Partida, Dibujo, Valora, Comentario
 from datetime import timedelta
 
 import json
@@ -69,7 +69,7 @@ def historia(request, cod):
 
 	return JsonResponse({'history': frase, 'startTime': time}, status = 200)
 
-#9. game/cod/player/name/drawing/rating
+#9. game/cod/player/name/drawing/rating mal
 @csrf_exempt
 def puntuacion(request, cod, nom):
 	if request.method != 'PUT':
@@ -104,3 +104,36 @@ def puntuacion(request, cod, nom):
 	#valorar.save()
 
 	return JsonResponse({'state': 'OK'}, status = 200)
+
+#12. drawings
+@csrf_exempt
+def dibujos(request):
+	if request.method != 'GET':
+		return None
+
+	token = request.headers.get('sessionToken')
+	tokenBD = Usuario.objects.filter(token = token).exists()
+
+	if not token or tokenBD is False:
+		return JsonResponse({'error': 'Invalid token'}, status=400)
+
+	dibujosOrdenados = Dibujo.objects.all().order_by("fecha")
+
+	respuesta = []
+	for dibujo in dibujosOrdenados:
+		diccionario = {}
+		diccionario['path'] = dibujo.link
+		diccionario['UploadAt'] = dibujo.fecha
+		diccionario['comments'] = []
+
+		comentarios = Comentario.objects.all().filter(id_dibujo = dibujo.id)
+
+		for comentario in comentarios:
+			diccionario2 = {}
+			tokenUsuario = Comentario.objects.get(token_usuario = token)
+			print(tokenUsuario.values())
+			nombre = Usuario.objects.get(token = tokenUsuario.token_usuario)
+			diccionario2['user']  = nombre.nombre
+			diccionario2['comment'] = comentario.comentario
+
+	return JsonResponse(respuesta)
