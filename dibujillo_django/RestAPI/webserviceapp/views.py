@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 from .models import Usuario, Partida, Dibujo, Valora, Comentario, Participa
 import jwt
-from datetime import datetime
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from json import JSONDecodeError
 from django.contrib.auth.hashers import check_password, make_password
@@ -45,7 +45,7 @@ def registrarUsuario(request):
         return JsonResponse({"status": "Error"})
 
 
-#por probar
+#funciona
 @csrf_exempt
 def crearPartida(request):
     if request.method != 'POST':
@@ -61,16 +61,16 @@ def crearPartida(request):
             players = usuario.nombre
             partida = Partida()
             partida.codigo = cantidadPartidas
-            partida.createdat = datetime.now()
-            print("pa mi k es aqui")
-            partida.token_usuario = session_token
-            print("jeje")
+            partida.createdat = timezone.now()
+            partida.token_usuario = usuario
             partida.save()
+            print("llega?")
             return JsonResponse({
                 'code': cantidadPartidas,
-                'players': {players},
-                'createdAt': datetime.now()
+                'players': [players],
+                'createdAt': timezone.now()
             }, status=200)
+            print("aquí no debería")
         else:
             return JsonResponse({'error': 'Invalid token'}, status=401)
     except Exception:
