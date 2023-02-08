@@ -177,7 +177,7 @@ def profile(request, name):
     if request.method != 'GET':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-    session_token = request.headers.get('SessionToken', None)
+    session_token = request.META.get('SessionToken', None)
     if not session_token:
         return JsonResponse({'error': 'Invalid token'}, status=401)
 
@@ -194,13 +194,13 @@ def profile(request, name):
     response_data = {'drawings': []}
     for participation in participations:
         try:
-            drawing = Dibujo.objects.get(token=participation.token_dibujo)
+            drawing = Dibujo.objects.get(codigo_partida=participation.codigo_partida)
         except Dibujo.DoesNotExist:
             continue
-        comments = Comentario.objects.filter(token_dibujo=drawing.token)
+        comments = Comentario.objects.filter(id_dibujo=drawing.id)
         drawing_data = {
             'id': drawing.id,
-            'history': drawing.historia,
+            'history': drawing.partida.historia,
             'path': drawing.link,
             'uploadedAt': drawing.fecha,
             'comments': [{
