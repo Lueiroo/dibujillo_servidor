@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Usuario, Partida, Participa, Dibujo, Comentario
 from django.contrib.auth.hashers import check_password
+from django.utils import timezone
 
 import json
 import jwt
@@ -21,7 +22,7 @@ def invitado(request):
         return JsonResponse({'error': 'JSON invalido'}, status=400)
 
     invitado = Usuario()
-    nomInvitado = peticion['name']
+    nomInvitado = peticion['username']
 
     if (nomInvitado == ""):
         return JsonResponse({'error': 'Faltan parametros'}, status=400)
@@ -91,6 +92,8 @@ def join_game(request, cod):
         session_token = request.headers.get('sessionToken')
     except Exception:
         return JsonResponse({'error': 'SessionToken does no exist'}, status=401)
+    print(session_token)
+
     try:
         user = Usuario.objects.get(token=session_token)
     except Usuario.DoesNotExist:
@@ -159,7 +162,7 @@ def share_drawing(request, cod):
     if request.method != 'POST':
         return None
 
-    session_token = request.headers.get('SessionToken', None)
+    session_token = request.headers.get('sessionToken')
     if not session_token:
         return JsonResponse({'error': 'Token inválido'}, status=401)
 
@@ -173,6 +176,10 @@ def share_drawing(request, cod):
             codigo_partida=partida, token_usuario=session_token)
     except Dibujo.DoesNotExist:
         return JsonResponse({'error': 'No se puede compartir el dibujo'}, status=400)
+
+    dibujo.fecha = timezone.now()
+
+    dibujo.save()
 
     return JsonResponse({'path': dibujo.link, 'uploadAt': dibujo.fecha}, status=200)
 
