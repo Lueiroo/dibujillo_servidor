@@ -195,7 +195,7 @@ def profile(request, name):
         diccionario['id'] = dibujo['id']
         diccionario['history'] = Partida.objects.get(codigo=dibujo['codigo_partida_id']).historia
         diccionario['path'] = dibujo['link']
-        diccionario['UploadAt'] = dibujo['fecha'].isoformat()
+        diccionario['UploadAt'] = dibujo['fecha']
 
         diccionario['comments'] = []
         comentarios = Comentario.objects.filter(id_dibujo=dibujo['id']).values()
