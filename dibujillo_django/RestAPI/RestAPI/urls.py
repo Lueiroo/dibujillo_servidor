@@ -16,27 +16,27 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from webserviceapp import views
-<<<<<<< HEAD
-=======
 
-from webserviceapp import views
->>>>>>> 93baa5d103d89714ce1dd0c3a9a90806f272acb4
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('guest', views.invitado),
-<<<<<<< HEAD
+    path('game/<str:cod>', views.datosSala),
+    path('game/<str:cod>/history', views.historia),
+    path('game/<str:cod>/player/<str:nom>/drawing/rating', views.puntuacion),
+    path('drawings', views.dibujos),
     path('session', views.login),
     path('game/<str:cod>', views.join_game),
     path('game/<str:cod>/player/<str:name>/drawing', views.get_drawing),
     path('game/<str:cod>/share', views.share_drawing),
     path('user/<str:name>', views.profile),
-
-=======
     path('users/', views.registrarUsuario),
     path('game/', views.crearPartida),
     path('game/<int:cod>', views.subirDibujo),
     path('game/<int:cod>', views.podio),
     path('drawings/<int:id>/comments', views.comentar)
->>>>>>> 93baa5d103d89714ce1dd0c3a9a90806f272acb4
+
 ]
