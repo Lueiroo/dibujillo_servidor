@@ -185,7 +185,7 @@ components:
       description: "El código de la partida"
       example: '2'
       schema:
-        type: integer
+        type: integer #
         
     id:
       name: id

@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
 from webserviceapp import views
+
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +28,15 @@ urlpatterns = [
     path('game/<str:cod>/history', views.historia),
     path('game/<str:cod>/player/<str:nom>/drawing/rating', views.puntuacion),
     path('drawings', views.dibujos),
+    path('session', views.login),
+    path('game/<str:cod>', views.join_game),
+    path('game/<str:cod>/player/<str:name>/drawing', views.get_drawing),
+    path('game/<str:cod>/share', views.share_drawing),
+    path('user/<str:name>', views.profile),
+    path('users/', views.registrarUsuario),
+    path('game/', views.crearPartida),
+    path('game/<int:cod>', views.subirDibujo),
+    path('game/<int:cod>', views.podio),
+    path('drawings/<int:id>/comments', views.comentar)
+
 ]

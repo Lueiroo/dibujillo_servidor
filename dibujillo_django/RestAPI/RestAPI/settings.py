@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -62,7 +63,11 @@ CORS_ALLOW_HEADERS = [
 	"sessionToken",
 	"SessionToken",
 	"Content-Type",
+
 ]
+
+
+
 
 ROOT_URLCONF = 'RestAPI.urls'
 
@@ -118,6 +123,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+PASSWORD_HASHERS = [
+
+'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+'django.contrib.auth.hashers.BCryptPasswordHasher',
+'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+'django.contrib.auth.hashers.Argon2PasswordHasher',
+
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -130,6 +144,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
