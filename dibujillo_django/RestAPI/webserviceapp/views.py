@@ -182,3 +182,4 @@ def dibujos(request):
 			diccionario['comments'].append(diccionario2)
 
 	return JsonResponse(respuesta,safe=False)
+
