@@ -179,42 +179,35 @@ def share_drawing(request, cod):
 
 def profile(request, name):
     if request.method != 'GET':
-        return None
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-    token = request.headers.get('sessionToken')
-    tokenBD = Usuario.objects.filter(token=token).exists()
+    token = request.headers.get('SessionToken')
+    user = Usuario.objects.filter(token=token, nombre=name).first()
 
-    if not token or tokenBD is False:
-        return JsonResponse({'error': 'Invalid token'}, status=400)
+    if not token or not user:
+        return JsonResponse({'error': 'Invalid token or user not found'}, status=401)
 
-    dibujosOrden = Dibujo.objects.all().order_by("fecha")
-    historia= Dibujo.objects.filter(codigo_partida=Partida.codigo)
+    dibujosOrden = Dibujo.objects.filter(token_usuario=user).all().order_by("fecha").values()
 
     dibujos = []
     for dibujo in dibujosOrden:
         diccionario = {}
         diccionario['id'] = dibujo['id']
+        diccionario['history'] = Partida.objects.get(codigo=dibujo['codigo_partida_id']).historia
         diccionario['path'] = dibujo['link']
-        diccionario['UploadAt'] = dibujo['fecha']
-        
-        historia= Partida.objects.get(codigo=dibujo['codigo_partida_id'])
-        diccionario['history'] = historia.historia
-        
-        nombreUsuario = Usuario.objects.get(token=dibujo['token_usuario_id'])
-        diccionario['user'] = nombreUsuario.nombre
+        diccionario['UploadAt'] = dibujo['fecha'].isoformat()
 
         diccionario['comments'] = []
-        comentarios= Comentario.objects.filter(id_dibujo=dibujo['id']).values()
-        dibujos.append(diccionario)
+        comentarios = Comentario.objects.filter(id_dibujo=dibujo['id']).values()
         for comentario in comentarios:
             diccionario2 = {}
-            tokenUsuario = Usuario.objects.get(token=dibujo['token_usuario_id'])
-            nombre= Usuario.objects.get(token=tokenUsuario.token)
-            diccionario2['user'] = nombre.nombre
+            diccionario2['user'] = Usuario.objects.get(token=comentario['token_usuario_id']).nombre
             diccionario2['comment'] = comentario['comentario']
-            diccionario2['comments'].append(diccionario2)
+            diccionario['comments'].append(diccionario2)
 
-    return JsonResponse(dibujos, safe=False)
+        dibujos.append(diccionario)
+
+    return JsonResponse({'drawings': dibujos}, safe=False)
 
 
 
