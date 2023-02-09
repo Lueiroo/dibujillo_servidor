@@ -58,6 +58,7 @@ class Usuario(models.Model):
     def set_password(self, raw_password):
         self.contrasena = make_password(raw_password)
 
+
     class Meta:
         managed = False
         db_table = 'usuario'
