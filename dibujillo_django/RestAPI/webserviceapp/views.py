@@ -182,12 +182,11 @@ def profile(request, name):
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
     token = request.headers.get('SessionToken')
-    user = Usuario.objects.filter(token=token, nombre=name).first()
 
-    if not token or not user:
+    if not token or not name:
         return JsonResponse({'error': 'Invalid token or user not found'}, status=401)
 
-    dibujosOrden = Dibujo.objects.filter(token_usuario=user).all().order_by("fecha").values()
+    dibujosOrden = Dibujo.objects.all().order_by("fecha").values()
 
     dibujos = []
     for dibujo in dibujosOrden:
